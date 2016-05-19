@@ -1,0 +1,128 @@
+README for raw2root executable.
+May 19th, 2015
+Cory R. Thornsberry
+
+1) Getting the source
+	git clone https://github.com/cthornsb/raw2root.git
+	This command will make a new directory named "raw2root" in the current
+	directory.
+
+2) Installation
+	NOTE: Root 5 or higher must be installed in order to install raw2root.
+	By default, the executables are installed to "./raw2root/".
+	To install raw2root, cd to the directory containing the raw2root git
+	repository and simply type "make". The Makefile will handle the
+	compilation of the source code.
+	
+	To install the binaries, type "make install". This will create symbolic
+	links to the executables in your home bin directory (~/bin/ by default).
+	To change the install location, change the variable named "INSTALL_DIR"
+	in the Makefile.
+	
+3) Using raw2root
+	SYNTAX: ./raw2root [filename] <options>
+	 Available options:
+	 --help (-h)              | Display this dialogue.
+	 --names                  | First line of data file contains column names.
+	 --header [length]        | Number of lines in the data header.
+	 --delimiter [char]       | Supply the data delimiter for line parsing.
+	 --skip [num] [n1 n2 ...] | Skip num lines from the data file.
+
+	raw2root may be used to convert an ascii text file into a root file. This
+	program assumes that the ascii data is separated into columns and that all
+	columns are delimited by a known character.
+	
+	raw2root will generate an output root file with the same name as the input
+	file except with a .root extension. e.g. doing the following
+	
+	./raw2root /home/you/data/data.dat
+	
+	will produce an output file named '/home/you/data/data.root'.
+
+	NOTE: raw2root will overwrite output root files of the same name without
+	asking if you wish to do so. 
+
+	The name of the TTree used to store all input data is named "data". By
+	default, columns are added to branches which take the name COL00, COL01,
+	COL02, ... COLXX. 
+
+--names
+	
+	Passing the "--names" flag will use the first line of the input file to
+	get the names of all data columns in the file. e.g. if you have an ascii
+	file formatted as
+	
+	"/home/you/data/data.dat"
+	
+	COLUMN1	COLUMN2	COLUMN3
+	1	2	3
+	4	5	6
+	7	8	9
+	
+	And you run raw2root using
+	
+	./raw2root /home/you/data/data.dat --names
+	
+	You will get an output root file with three branches in the data TTree.
+	These branches will be named "COLUMN1", "COLUMN2", and "COLUMN3". The
+	COLUMN1 branch would contain 1, 4, and 7. COLUMN2 would contain 2, 5,
+	and 8 and so on.
+
+--header
+
+	Passing the "--header" flag will use the first 'length' number of lines
+	as file header information. These lines will be copied to the output
+	root file as TNamed objects.
+
+--delimiter
+	
+	Passing the "--delimiter" flag will use a user specified character as
+	the deliminating character. This character must be specified as an
+	integer. e.g. a comma ',' should be specified by using its ascii
+	code 44. By default, the tab character '\t' (9) is used. So if you 
+	have data formatted as
+	
+	"/home/you/data/data.dat"
+	
+	1,2,3
+	4,5,6
+	7,8,9
+	
+	And you run raw2root using
+	
+	./raw2root /home/you/data/data.dat --delimiter 44
+	
+	The data will be separated into three columns named COL01, 02, and 03.
+	
+	NOTE: All data in the file must be separated using the same delimiter.
+	Use of multiple delimiters is not available.
+
+--skip
+	
+	Passing the "--skip" flag will cause raw2root to skip 'num' lines from
+	the input file. These lines must be specified by the user. So if you
+	have an input file formatted as
+	
+	1	2	3
+	4	5	6
+	7	8	9
+	10	11	12
+	13	14	15
+	
+	And you run raw2root using
+	
+	./raw2root /home/you/data/data.dat --skip 2 2 4
+	
+	raw2root will skip two of the lines from the file. i.e. lines 2 and 4. So
+	you would get a tree with three branches named COL01, 02, and 03. COL01
+	would contain the values 1, 7, and 13. COL02 would contain 2, 8, and 14
+	and COL03 would contain 3, 9, and 15. The second and fourth rows are 
+	ignored. This option is useful for skipping lines with known bad values.
+	
+5) Cleaning up
+	Typing "make clean" in the ./raw2root/ directory will remove the compiled
+	raw2root executable.
+	
+	Typing "make uninstall" will remove the symbolic link which was installed
+	to the install directory (if available) but will leave the executable
+	untouched. This command will effectively uninstall raw2root from the system.
