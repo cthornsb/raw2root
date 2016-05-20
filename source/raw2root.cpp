@@ -48,7 +48,7 @@ size_t split_string(const std::string &input_, std::vector<std::string> &values,
 		}
 			
 		currIndex++;
-		values.push_back(input_.substr(prevIndex, currIndex-prevIndex));
+		values.push_back(input_.substr(prevIndex, currIndex-prevIndex-1));
 		
 		if(currIndex == std::string::npos){ break; }
 		prevIndex = currIndex;		
