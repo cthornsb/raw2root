@@ -32,13 +32,7 @@ $(EXECUTABLE): $(MAIN_SRC)
 
 ########################################################################
 
-.PHONY: install tidy clean clean_obj
-
-#####################################################################
-
-$(OBJ_DIR):
-#	Make the object file directory
-	mkdir -p $@
+.PHONY: install uninstall clean
 
 #####################################################################
 
