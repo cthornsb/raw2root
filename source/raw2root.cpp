@@ -1,8 +1,8 @@
 // raw2root.cpp
-// C. Thornsberry
+// C. R. Thornsberry
 // June 15th, 2015
 // Raw2Root.cpp
-// SYNTAX: ./raw2root [filename] <options>
+// SYNTAX: ./raw2root <filename> [options]
 
 #include <iostream>
 #include <stdlib.h>
@@ -58,13 +58,13 @@ size_t split_string(const std::string &input_, std::vector<std::string> &values,
 }
 
 void help(char * prog_name_){
-	std::cout << "  SYNTAX: " << prog_name_ << " [filename] <options>\n";
+	std::cout << "  SYNTAX: " << prog_name_ << " <filename> [options]\n";
 	std::cout << "   Available options:\n";
 	std::cout << "    --help (-h)              | Display this dialogue.\n";
 	std::cout << "    --names                  | First line of data file contains column names.\n";
-	std::cout << "    --header [length]        | Number of lines in the data header.\n";
-	std::cout << "    --delimiter [char]       | Supply the data delimiter for line parsing.\n";
-	std::cout << "    --skip [num] [n1 n2 ...] | Skip num lines from the data file.\n";
+	std::cout << "    --header <length>        | Number of lines in the data header.\n";
+	std::cout << "    --delimiter <char>       | Supply the data delimiter for line parsing.\n";
+	std::cout << "    --skip <num> <n1 n2 ...> | Skip num lines from the data file.\n";
 }
 
 int main(int argc, char* argv[]){
