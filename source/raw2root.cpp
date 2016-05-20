@@ -224,7 +224,7 @@ int main(int argc, char* argv[]){
 	std::vector<std::string> values;
 	while(true){
 		if(count % 10000 == 0 && count != 0){ std::cout << "  Line " << count << " of data file\n"; }
-		if(count+1 <= (unsigned int)last_skip_line && is_in(skip_lines, ++count)){ continue; }
+		if(count+1 <= (unsigned int)last_skip_line && is_in(skip_lines, count+1)){ continue; }
 		
 		// Get a line of data
 		getline(input_file, line);
@@ -257,10 +257,11 @@ int main(int argc, char* argv[]){
 		named->Write();
 	}
 	
-	tree->Write();
-	
-	std::cout << " Found " << count << " entries in " << num_columns << " columns\n";
+	std::cout << " Found " << tree->GetEntries() << " entries in " << num_columns << " columns\n";
 	std::cout << " Generated file " << fname << ".root\n";
+
+	output_file->cd();
+	tree->Write();
 
 	input_file.close();
 	output_file->Close();
