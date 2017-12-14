@@ -229,12 +229,20 @@ int main(int argc, char* argv[]){
 		input_file.seekg(-first_line.size(), std::ios::cur);
 		for(unsigned int i = 0; i < num_columns; i++){
 			std::stringstream stream;
-			if(i < 10){ stream << "Col0" << i; }
-			else{ stream << "Col" << i; }
+			if(i < 10){ stream << "col0" << i; }
+			else{ stream << "col" << i; }
 			if(!update_output_file)
 				tree->Branch(stream.str().c_str(),&vars[i]);
-			else
-				tree->SetBranchAddress(stream.str().c_str(),&vars[i]);
+			else{
+				TBranch *branch;
+				tree->SetBranchAddress(stream.str().c_str(),&vars[i],&branch);
+				if(!branch){
+					std::cout << " Error: Failed to load branch \"" << stream.str() << "\" from file.\n";
+					input_file.close();
+					output_file->Close();
+					return 1;
+				}
+			}
 		}
 	}
 	else{ // Extract column names from data
