@@ -65,6 +65,7 @@ void help(char * prog_name_){
 	std::cout << "    --header <length>        | Number of lines in the data header.\n";
 	std::cout << "    --delimiter <char>       | Supply the data delimiter for line parsing.\n";
 	std::cout << "    --skip <num> <n1 n2 ...> | Skip num lines from the data file.\n";
+	std::cout << "    --append                 | Append entries to an existing tree.\n";
 }
 
 int main(int argc, char* argv[]){
@@ -79,6 +80,7 @@ int main(int argc, char* argv[]){
 	}
 
 	std::vector<int> skip_lines;
+	bool update_output_file = false;
 	bool use_column_names = false;
 	int index = 2;
 	int num_head_lines = 0;
@@ -127,6 +129,9 @@ int main(int argc, char* argv[]){
 				if(temp_line > last_skip_line){ last_skip_line = temp_line; }
 			}
 		}
+		else if(strcmp(argv[index], "--append") == 0){
+			update_output_file = true;
+		}
 		else{ 
 			std::cout << " Error! Unrecognized option '" << argv[index] << "'!\n";
 			help(argv[0]);
@@ -144,7 +149,11 @@ int main(int argc, char* argv[]){
 	std::vector<std::string> filename;
 	split_string(std::string(argv[1]), filename, '.');
 	std::string fname = filename.front();
-	TFile *output_file = new TFile((fname+".root").c_str(),"RECREATE");
+	TFile *output_file;
+	if(!update_output_file)
+		output_file = new TFile((fname+".root").c_str(),"RECREATE");
+	else
+		output_file = new TFile((fname+".root").c_str(),"UPDATE");
 	if(!output_file->IsOpen()){
 		std::cout << " Error: Failed to open output file " << fname << ".root\n";
 		input_file.close();
@@ -152,7 +161,18 @@ int main(int argc, char* argv[]){
 		return 1;
 	}
 	
-	TTree *tree = new TTree("data","Raw2Root Tree");
+	TTree *tree;
+	if(!update_output_file)
+		tree = new TTree("data","Raw2Root Tree");
+	else{
+		tree = (TTree*)output_file->Get("data");
+		if(!tree){
+			std::cout << " Error: Failed to load TTree \"data\" from file.\n";
+			input_file.close();
+			output_file->Close();
+			return 1;
+		}
+	}
 	unsigned int count = 0;
 	unsigned int num_columns = 0;
 	
@@ -211,17 +231,32 @@ int main(int argc, char* argv[]){
 			std::stringstream stream;
 			if(i < 10){ stream << "Col0" << i; }
 			else{ stream << "Col" << i; }
-			tree->Branch(stream.str().c_str(),&vars[i]);
+			if(!update_output_file)
+				tree->Branch(stream.str().c_str(),&vars[i]);
+			else
+				tree->SetBranchAddress(stream.str().c_str(),&vars[i]);
 		}
 	}
 	else{ // Extract column names from data
 		for(unsigned int i = 0; i < num_columns; i++){
-			tree->Branch(column_names[i].c_str(),&vars[i]);
+			if(!update_output_file)
+				tree->Branch(column_names[i].c_str(),&vars[i]);
+			else{
+				TBranch *branch;
+				tree->SetBranchAddress(column_names[i].c_str(),&vars[i],&branch);
+				if(!branch){
+					std::cout << " Error: Failed to load branch \"" << column_names[i] << "\" from file.\n";
+					input_file.close();
+					output_file->Close();
+					return 1;
+				}
+			}
 		}
 	}
 
 	std::string line;
 	std::vector<std::string> values;
+	unsigned int total_counts = 0;
 	while(true){
 		if(count % 10000 == 0 && count != 0){ std::cout << "  Line " << count << " of data file\n"; }
 		if(count+1 <= (unsigned int)last_skip_line && is_in(skip_lines, count+1)){ continue; }
@@ -246,7 +281,7 @@ int main(int argc, char* argv[]){
 		
 		// Fill all branches
 		tree->Fill();
-		
+		total_counts++;
 	}
 
 	output_file->cd();
@@ -257,8 +292,11 @@ int main(int argc, char* argv[]){
 		named->Write();
 	}
 	
-	std::cout << " Found " << tree->GetEntries() << " entries in " << num_columns << " columns\n";
-	std::cout << " Generated file " << fname << ".root\n";
+	std::cout << " Found " << total_counts << " entries in " << num_columns << " columns\n";
+	if(!update_output_file)
+		std::cout << " Generated file " << fname << ".root\n";
+	else
+		std::cout << " Output tree now contains " << tree->GetEntries() << " entries\n";
 
 	output_file->cd();
 	tree->Write();
