@@ -257,14 +257,17 @@ int main(int argc, char* argv[]){
 	std::string line;
 	std::vector<std::string> values;
 	unsigned int total_counts = 0;
-	while(true){
-		if(count % 10000 == 0 && count != 0){ std::cout << "  Line " << count << " of data file\n"; }
-		if(count+1 <= (unsigned int)last_skip_line && is_in(skip_lines, count+1)){ continue; }
-		
+	while(true){		
 		// Get a line of data
 		getline(input_file, line);
 		if(input_file.eof() || !input_file.good()){ break; }
-		
+	
+		if(count % 10000 == 0 && count != 0){ std::cout << "  Line " << count << " of data file\n"; }
+		if(count+1 <= (unsigned int)last_skip_line && is_in(skip_lines, count+1)){ 
+			std::cout << " User skipping line " << ++count << std::endl;
+			continue; 
+		}
+	
 		// Split the data line into values.
 		split_string(line, values, delimiter);
 		count++;
