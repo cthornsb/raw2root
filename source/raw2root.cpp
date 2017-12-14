@@ -36,20 +36,25 @@ bool is_in(const std::vector<int> &nums, int num_){
   */
 size_t split_string(const std::string &input_, std::vector<std::string> &values, const char delimiter_='\t'){
 	values.clear();
-	
+
+	std::string currStr = input_;
+	size_t hashIndex = currStr.find_last_of('#');
+	if(hashIndex != std::string::npos)
+		currStr = currStr.substr(hashIndex+1);
+
 	size_t prevIndex = 0;
 	size_t currIndex;
 	while(true){
-		currIndex = input_.find(delimiter_, prevIndex);
+		currIndex = currStr.find(delimiter_, prevIndex);
 		
 		if(currIndex == std::string::npos){
-			values.push_back(input_.substr(prevIndex));
+			values.push_back(currStr.substr(prevIndex));
 			break;
 		}
-			
-		currIndex++;
-		values.push_back(input_.substr(prevIndex, currIndex-prevIndex-1));
 		
+		currIndex++;
+		values.push_back(currStr.substr(prevIndex, currIndex-prevIndex-1));
+
 		if(currIndex == std::string::npos){ break; }
 		prevIndex = currIndex;		
 	}
@@ -222,6 +227,7 @@ int main(int argc, char* argv[]){
 
 	double *vars = new double[num_columns];
 	for(unsigned int i = 0; i < num_columns; i++){
+		std::cout << "  " << i << ": " << column_names[i] << std::endl;
 		vars[i] = 0.0;
 	}
 
