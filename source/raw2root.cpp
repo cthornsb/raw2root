@@ -34,7 +34,7 @@ bool is_in(const std::vector<int> &nums, int num_){
   *  param[out] values : Vector of substrings which the input is split into.
   *  param[in] delimiter_ : The character around which to split the input string.
   */
-size_t split_string(const std::string &input_, std::vector<std::string> &values, const char delimiter_='\t'){
+size_t split_string(const std::string &input_, std::vector<std::string> &values, const std::string &delimiter_="\t"){
 	values.clear();
 
 	std::string currStr = input_;
@@ -42,21 +42,17 @@ size_t split_string(const std::string &input_, std::vector<std::string> &values,
 	if(hashIndex != std::string::npos)
 		currStr = currStr.substr(hashIndex+1);
 
-	size_t prevIndex = 0;
-	size_t currIndex;
+	size_t index1, index2=0;
 	while(true){
-		currIndex = currStr.find(delimiter_, prevIndex);
-		
-		if(currIndex == std::string::npos){
-			values.push_back(currStr.substr(prevIndex));
+		index1 = currStr.find_first_not_of(delimiter_, index2);
+		index2 = currStr.find_first_of(delimiter_, index1+1);
+	
+		if(index2 == std::string::npos){
+			values.push_back(currStr.substr(index1));
 			break;
 		}
-		
-		currIndex++;
-		values.push_back(currStr.substr(prevIndex, currIndex-prevIndex-1));
-
-		if(currIndex == std::string::npos){ break; }
-		prevIndex = currIndex;		
+	
+		values.push_back(currStr.substr(index1, index2-index1));
 	}
 	
 	return values.size();
@@ -90,7 +86,7 @@ int main(int argc, char* argv[]){
 	int index = 2;
 	int num_head_lines = 0;
 	int last_skip_line = -9999;
-	char delimiter = '\t';
+	std::string delimiter = "\t";
 	while(index < argc){
 		if(strcmp(argv[index], "--names") == 0){
 			std::cout << " Using first line of data for column names\n";
@@ -102,7 +98,7 @@ int main(int argc, char* argv[]){
 				help(argv[0]);
 				return 1;
 			}
-			num_head_lines = atoi(argv[++index]);
+			num_head_lines = strtol(argv[++index], NULL, 0);
 			std::cout << " Using file header of " << num_head_lines << " lines\n";
 		}
 		else if(strcmp(argv[index], "--delimiter") == 0){
@@ -111,8 +107,8 @@ int main(int argc, char* argv[]){
 				help(argv[0]);
 				return 1;
 			}
-			delimiter = (char)atoi(argv[++index]);
-			std::cout << " Using column delimiter '" << delimiter << "'\n";
+			delimiter = std::string(argv[++index]);
+			std::cout << " Using column delimiter \"" << delimiter << "\"\n";
 		}
 		else if(strcmp(argv[index], "--skip") == 0){
 			if(index + 1 >= argc){
@@ -120,7 +116,7 @@ int main(int argc, char* argv[]){
 				help(argv[0]);
 				return 1;
 			}
-			int num_lines_to_skip = atoi(argv[++index]);
+			int num_lines_to_skip = strtol(argv[++index], NULL, 0);
 			std::cout << " Skipping " << num_lines_to_skip << " lines in the data file\n";
 			if(index + num_lines_to_skip >= argc){
 				std::cout << " Error! Missing required argument to '--skip'!\n";
@@ -129,7 +125,7 @@ int main(int argc, char* argv[]){
 			}
 			int temp_line;
 			for(int i = 0; i < num_lines_to_skip; i++){
-				temp_line = atoi(argv[++index]);
+				temp_line = strtol(argv[++index], NULL, 0);
 				skip_lines.push_back(temp_line);
 				if(temp_line > last_skip_line){ last_skip_line = temp_line; }
 			}
@@ -152,7 +148,7 @@ int main(int argc, char* argv[]){
 	}
 
 	std::vector<std::string> filename;
-	split_string(std::string(argv[1]), filename, '.');
+	split_string(std::string(argv[1]), filename, ".");
 	std::string fname = filename.front();
 	TFile *output_file;
 	if(!update_output_file)
