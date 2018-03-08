@@ -45,8 +45,9 @@ size_t split_string(const std::string &input_, std::vector<std::string> &values,
 	size_t index1, index2=0;
 	while(true){
 		index1 = currStr.find_first_not_of(delimiter_, index2);
+		if(index1 == std::string::npos) break;
+		
 		index2 = currStr.find_first_of(delimiter_, index1+1);
-	
 		if(index2 == std::string::npos){
 			values.push_back(currStr.substr(index1));
 			break;
